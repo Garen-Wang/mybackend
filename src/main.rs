@@ -36,9 +36,8 @@ impl AppState {
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     dotenv().ok();
-    let frontend_url = "localhost:8000";
-    let backend_url = "localhost:7878";
-    std::env::set_var("RUST_LOG", "actix_web=debug");
+    // std::env::set_var("RUST_LOG", "actix_web=debug");
+    std::env::set_var("RUST_LOG", "debug");
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
     env_logger::init();
 
@@ -49,8 +48,14 @@ async fn main() -> io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin(frontend_url)
-            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT]) // TODO: headers not enough
+            .allow_any_origin()
+            // .allowed_origin("http://localhost:8080/")
+            // .allowed_origin_fn(|origin, _req_head| {
+            //     origin.as_bytes().starts_with(b"http://localhost")
+            // })
+            .allowed_methods(vec!["GET", "POST", "DELETE"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
         App::new()
@@ -58,9 +63,11 @@ async fn main() -> io::Result<()> {
             .app_data(web::Data::new(app_state.clone()))
             .wrap(cors)
             .wrap(auth::Authorization)
-            .configure(routes::routes)
+            .configure(routes::healthcheck_routes)
+            .configure(routes::auth_routes)
+            .configure(routes::user_routes)
     })
-    .bind(backend_url)?
+    .bind("localhost:7878")?
     .run()
     .await
 }

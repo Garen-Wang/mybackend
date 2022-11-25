@@ -55,8 +55,6 @@ pub async fn update(
         email: form.user.email.clone(),
         username: form.user.username.clone(),
         password: form.user.password.clone(),
-        bio: form.user.bio.clone(),
-        image: form.user.image.clone(),
     })?;
     let token = updated_user.generate_token()?;
     let res = UserResponse::from((updated_user, token));

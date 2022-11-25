@@ -14,8 +14,6 @@ impl From<(User, String)> for UserResponse {
                 email: user.email,
                 token,
                 username: user.username,
-                bio: user.bio,
-                image: user.image,
             },
         }
     }
@@ -26,6 +24,4 @@ pub struct AuthUser {
     pub email: String,
     pub token: String,
     pub username: String,
-    pub bio: Option<String>,
-    pub image: Option<String>,
 }

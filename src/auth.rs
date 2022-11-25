@@ -8,7 +8,6 @@ use diesel::PgConnection;
 use futures::future::LocalBoxFuture;
 use serde_json::json;
 use std::future::{ready, Ready};
-use uuid::Uuid;
 
 use crate::{error::AppError, token, user::model::User, AppState};
 
@@ -24,7 +23,7 @@ impl SkipAuthRoute {
         first == '{' && last == '}'
     }
 
-    fn matches_path_method(&self, path: &str, method: &Method) -> bool {
+    fn matches_path_and_method(&self, path: &str, method: &Method) -> bool {
         self.matches_path(path) && self.matches_method(method)
     }
 
@@ -69,28 +68,28 @@ fn should_skip_auth(req: &ServiceRequest) -> bool {
     } else {
         SKIP_AUTH_ROUTES
             .iter()
-            .any(|route| route.matches_path_method(req.path(), req.method()))
+            .any(|route| route.matches_path_and_method(req.path(), req.method()))
     }
 }
 
-fn get_user_id_from_header(req: &ServiceRequest) -> Result<Uuid, &str> {
+fn get_user_id_from_header(req: &ServiceRequest) -> Result<i32, &str> {
     req.headers()
-        .get("Authorization")
+        .get("authorization")
         .ok_or("authorization key-value not found in key-value header")
         .and_then(|header| header.to_str().map_err(|_| "cannot stringify"))
         .and_then(|str| {
-            if str.starts_with("Token") {
-                Ok(str)
+            if str.starts_with("Bearer") {
+                log::debug!("yes! get user id from header!");
+                Ok(str.trim_start_matches("Bearer").trim())
             } else {
                 Err("Invalid token")
             }
         })
-        .map(|str| str[6..str.len()].trim())
         .and_then(|str| token::decode_token(str).map_err(|_| "cannot decode token"))
         .map(|token| token.claims.user_id)
 }
 
-fn find_auth_user(conn: &mut PgConnection, user_id: Uuid) -> Result<User, AppError> {
+fn find_auth_user(conn: &mut PgConnection, user_id: i32) -> Result<User, AppError> {
     let user = User::find(conn, user_id)?;
     Ok(user)
 }
@@ -176,7 +175,6 @@ where
 
     fn call(&self, mut req: ServiceRequest) -> Self::Future {
         log::info!("Hi from start. You requested: {}", req.path());
-        println!("Hi from start. You requested: {}", req.path());
         let verified = if should_skip_auth(&req) {
             true
         } else {
@@ -187,7 +185,6 @@ where
             Box::pin(async move {
                 let res = fut.await?.map_into_left_body();
                 log::info!("Hi from response. Verified.");
-                println!("Hi from response. Verified.");
                 Ok(res)
             })
         } else {
@@ -195,7 +192,6 @@ where
                 let (req, _payload) = req.into_parts();
                 let res = HttpResponse::Unauthorized().finish().map_into_right_body();
                 log::info!("Hi from response. Not verified.");
-                println!("Hi from response. Not verified.");
                 Ok(ServiceResponse::new(req, res))
             })
         }
@@ -205,5 +201,31 @@ where
         //     log::info!("Hi from response.");
         //     Ok(res)
         // })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use actix_web::http::Method;
+
+    use super::SkipAuthRoute;
+
+    #[test]
+    fn test_match_path_and_method() {
+        let route = SkipAuthRoute {
+            path: "/healthcheck",
+            method: Method::GET,
+        };
+        assert!(route.matches_path_and_method("/healthcheck", &Method::GET));
+        let route = SkipAuthRoute {
+            path: "/auth/login",
+            method: Method::GET,
+        };
+        assert!(route.matches_path_and_method("/auth/login", &Method::GET));
+        let route = SkipAuthRoute {
+            path: "/{slug}/healthcheck",
+            method: Method::GET,
+        };
+        assert!(route.matches_path_and_method("/6324/healthcheck", &Method::GET));
     }
 }
