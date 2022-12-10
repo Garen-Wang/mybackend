@@ -4,40 +4,34 @@ diesel::table! {
     albums (id) {
         id -> Int4,
         name -> Text,
-        singer_id -> Int4,
+        artist_id -> Int4,
         last_playback -> Nullable<Timestamp>,
         agreed -> Bool,
     }
 }
 
 diesel::table! {
-    audios (id) {
+    artists (id) {
         id -> Int4,
-        filepath -> Text,
+        name -> Text,
     }
 }
 
 diesel::table! {
-    favorite_albums (id) {
+    comments (id) {
+        id -> Int4,
+        album_id -> Int4,
+        author_id -> Int4,
+        body -> Text,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    favorites (id) {
         id -> Int4,
         user_id -> Int4,
         album_id -> Int4,
-    }
-}
-
-diesel::table! {
-    favorite_singers (id) {
-        id -> Int4,
-        user_id -> Int4,
-        singer_id -> Int4,
-    }
-}
-
-diesel::table! {
-    favorite_tracks (id) {
-        id -> Int4,
-        user_id -> Int4,
-        track_id -> Int4,
     }
 }
 
@@ -52,11 +46,10 @@ diesel::table! {
     tracks (id) {
         id -> Int4,
         name -> Text,
-        audio_id -> Int4,
-        time_length -> Nullable<Int4>,
+        time_length -> Int4,
         last_time -> Nullable<Int4>,
         last_playback -> Nullable<Timestamp>,
-        singer_id -> Int4,
+        artist_id -> Int4,
         album_id -> Int4,
     }
 }
@@ -71,23 +64,19 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(albums -> singers (singer_id));
-diesel::joinable!(favorite_albums -> albums (album_id));
-diesel::joinable!(favorite_albums -> users (user_id));
-diesel::joinable!(favorite_singers -> singers (singer_id));
-diesel::joinable!(favorite_singers -> users (user_id));
-diesel::joinable!(favorite_tracks -> tracks (track_id));
-diesel::joinable!(favorite_tracks -> users (user_id));
+diesel::joinable!(albums -> artists (artist_id));
+diesel::joinable!(comments -> albums (album_id));
+diesel::joinable!(comments -> users (author_id));
+diesel::joinable!(favorites -> albums (album_id));
+diesel::joinable!(favorites -> users (user_id));
 diesel::joinable!(tracks -> albums (album_id));
-diesel::joinable!(tracks -> audios (audio_id));
-diesel::joinable!(tracks -> singers (singer_id));
+diesel::joinable!(tracks -> artists (artist_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     albums,
-    audios,
-    favorite_albums,
-    favorite_singers,
-    favorite_tracks,
+    artists,
+    comments,
+    favorites,
     singers,
     tracks,
     users,

@@ -102,4 +102,9 @@ impl User {
             .first(conn)?;
         Ok(user)
     }
+
+    pub fn find_collections(conn: &mut PgConnection, user_id: i32) -> Result<Vec<i32>, AppError> {
+        let album_ids: Vec<i32> = favorites::table.filter(favorites::user_id.eq(user_id)).select(favorites::album_id).get_results(conn)?;
+        Ok(album_ids)
+    }
 }

@@ -1,0 +1,1 @@
+// Each album is made by exactly one artist, and with its own unique number or ID
