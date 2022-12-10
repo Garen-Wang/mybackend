@@ -1,7 +1,7 @@
 -- Your SQL goes here
 
-create table audios
+create table artists
 (
     id serial primary key,
-    filepath text not null
+    name text not null
 );

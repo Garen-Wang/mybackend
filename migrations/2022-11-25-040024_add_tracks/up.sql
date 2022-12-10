@@ -2,12 +2,13 @@
 create table tracks (
     id serial primary key,
     name text not null,
-    audio_id serial references audios (id),
-    time_length int,
-    last_time int,
-    last_playback timestamp,
-    singer_id serial not null,
-    album_id serial not null,
-    foreign key (singer_id) references singers (id),
-    foreign key (album_id) references albums (id)
+    time_length int not null,
+    last_time int default 0,
+    last_playback timestamp default current_timestamp,
+    artist_id serial not null references artists (id) on delete cascade,
+    album_id serial not null references albums (id) on delete cascade
 );
+
+create index tracks_artist_id_idx on tracks (artist_id);
+
+create index tracks_album_id_idx on tracks (album_id);
