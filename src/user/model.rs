@@ -1,8 +1,8 @@
+use crate::{error::AppError, schema::users};
+use crate::token;
 use chrono::Utc;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use crate::error::AppError;
-use crate::{schema::*, token};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable)]
 #[diesel(table_name = users)]
@@ -101,10 +101,5 @@ impl User {
             .limit(1)
             .first(conn)?;
         Ok(user)
-    }
-
-    pub fn find_collections(conn: &mut PgConnection, user_id: i32) -> Result<Vec<i32>, AppError> {
-        let album_ids: Vec<i32> = favorites::table.filter(favorites::user_id.eq(user_id)).select(favorites::album_id).get_results(conn)?;
-        Ok(album_ids)
     }
 }

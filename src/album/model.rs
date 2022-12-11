@@ -1,7 +1,10 @@
+use crate::{error::AppError, schema::albums};
 use chrono::NaiveDateTime;
-use diesel::{Queryable, Identifiable, Insertable, AsChangeset, PgConnection, QueryDsl, RunQueryDsl, TextExpressionMethods};
-use serde::{Serialize, Deserialize};
-use crate::{schema::albums, error::AppError};
+use diesel::{
+    AsChangeset, EqAll, Identifiable, Insertable, PgConnection, QueryDsl, Queryable, RunQueryDsl,
+    TextExpressionMethods,
+};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable)]
 #[diesel(table_name = albums)]
@@ -37,7 +40,30 @@ impl Album {
 
     pub fn search(conn: &mut PgConnection, name: String) -> Result<Vec<Album>, AppError> {
         let temp = format!("{}%", name);
-        let albums: Vec<Album> = albums::table.filter(albums::name.like(temp)).get_results(conn)?;
+        let albums: Vec<Album> = albums::table
+            .filter(albums::name.like(temp))
+            .get_results(conn)?;
         Ok(albums)
+    }
+
+    pub fn delete(conn: &mut PgConnection, album_id: i32) -> Result<usize, AppError> {
+        let item = diesel::delete(albums::table)
+            .filter(albums::id.eq_all(album_id))
+            .execute(conn)?;
+        Ok(item)
+    }
+
+    pub fn issue(conn: &mut PgConnection, album_id: i32) -> Result<Self, AppError> {
+        let changeset = UpdateAlbum {
+            agreed: Some(true),
+            name: None,
+            last_playback: None,
+        };
+        let album = diesel::update(
+            albums::table.find(album_id)
+        )
+        .set(changeset)
+        .get_result::<Album>(conn)?;
+        Ok(album)
     }
 }

@@ -66,6 +66,8 @@ async fn main() -> io::Result<()> {
             .configure(routes::healthcheck_routes)
             .configure(routes::auth_routes)
             .configure(routes::user_routes)
+            .configure(routes::artist_routes)
+            .configure(routes::album_routes)
     })
     .bind("localhost:7878")?
     .run()
