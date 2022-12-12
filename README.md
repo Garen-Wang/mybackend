@@ -1,60 +1,12 @@
 # mybackend
 
-## when a track is played, the latest date and time the playback began should be recorded
+## healthcheck
 
-### search last playback of track
+GET /healthcheck
 
-GET /track_history/{track_id}
+return ok
 
-### update last playback of track
-
-PUT /track_history/{track_id}
-
-## The database can store when the album was last played.
-
-### search last playback of album
-
-GET /album_history/{album_id}
-
-### update last playback of album
-
-PUT /album_history/{album_id}
-
-## users can search the artists or albums in the database
-
-GET /artist/{artist_name}
-
-GET /album/{album_name}
-
-## users can add or remove the albums in the database to/from their personal collection
-
-### search my favorite albums
-
-GET /favorite_albums
-
-### add my favorite albums
-
-GET /favorite_albums/{album_id}
-
-### remove my favorite albums
-
-DELETE /favorite_albums/{album_id}
-
-## users can search the albums or artists in the database, and add into their own collection
-
-### search favorite artists
-
-GET /favorite_artists
-
-### add favorite artists
-
-GET /favorite_artists/{album_id}
-
-### remove favorite artists
-
-DELETE /favorite_artists/{album_id}
-
-## personal users can register their unique accounts in the database
+## auth
 
 ### register
 
@@ -70,6 +22,8 @@ POST /auth/register
 }
 ```
 
+will return a token
+
 ### login
 
 POST /auth/login
@@ -83,38 +37,154 @@ POST /auth/login
 }
 ```
 
-## administrator can freely upload/issue new albums to the database
+will return a token
 
-### admin issue
+## user
+
+### get user info (need token)
+
+GET /user
+
+### update user info (need token)
+
+PUT /user
+
+## artist
+
+### search artists by name
+
+GET /artist/{artist_name}
+
+### create artist
+
+POST /artist
+
+```json
+{
+    "new_artist": {
+        "name": "Khalil Fong"
+    }
+}
+```
+
+## album
+
+### search albums by name
+
+GET /album/{album_name}
+
+### admin issue (need token)
 
 POST /album/issue/{album_id}
 
-### admin upload
-
-#### create album
+#### create album (need token)
 
 POST /album
 
-## administrator can freely remove the albums in the database
+```json
+{
+    "new_album": {
+        "artist_id": 1,
+        "name": "Wonderland"
+    }
+}
+```
 
-### admin remove
+### admin remove (need token)
 
 DELETE album/{album_id}
 
-## users can also upload new albums, but they are needed to be verified by the administrator
+## audio
 
-### user upload
+### admin upload & user upload track audio file
 
-TODO
+POST /audio/{track_id}
+
+example:
+```html
+<html>
+    <head><title>Upload Test</title></head>
+    <body>
+        <form target="/audio/1" method="post" enctype="multipart/form-data">
+            <input type="file" multiple name="file"/>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>
+```
+
+## favorite albums
+
+### search my favorite albums (need token)
+
+GET /favorite_albums
+
+### add my favorite albums (need token)
+
+GET /favorite_albums/{album_id}
+
+### remove my favorite albums (need token)
+
+DELETE /favorite_albums/{album_id}
+
+## favorite artists
+
+### search my favorite artists (need token)
+
+GET /favorite_artists
+
+### add my favorite artists (need token)
+
+GET /favorite_artists/{artist_id}
+
+### remove favorite artists (need token)
+
+DELETE /favorite_artists/{artist_id}
+
+## track history
+
+### search last playback of track (need token)
+
+GET /track_history/{track_id}
+
+### update last playback of track (need token)
+
+PUT /track_history/{track_id}
+
+## album history
+
+### search last playback of album (need token)
+
+GET /album_history/{album_id}
+
+### update last playback of album (need token)
+
+PUT /album_history/{album_id}
+
+## comment
+
+### readers make comments on the albums (need token)
+
+POST comment/{album_id}
+
+```json
+{
+    "comment": {
+        "body": "hehe"
+    }
+}
+```
+
+### readers delete a comment on the ablum (need token, author or admin)
+
+DELETE comment/{comment_id}
+
+### get all comments of an album
+
+GET comment/{album_id}
+
+---
 
 ## administrator can send messages to indicate whether a new album can be issued
 
 TODO: add field message in album
-
-## readers can make comments on the albums
-
-POST comment/{album_id}
-
-DELETE comment/{album_id}/{comment_id}
-
-GET comment/{album_id}
