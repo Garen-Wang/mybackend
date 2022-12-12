@@ -1,51 +1,73 @@
 use actix_web::web;
 
 use crate::{
-    album::handler::search_albums_by_name, artist::handler::search_artists_by_name,
-    favorite::handler::{search_favorites, add_to_favorites, remove_from_favorites}, healthcheck, user,
+    album::handler::*, artist::handler::*, comment::handler::*, favorite::handler::*,
+    healthcheck::handler::*, history::handler::*, user::handler::*,
 };
 
-pub fn healthcheck_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/healthcheck").route("", web::get().to(healthcheck::handler::index)));
-}
+pub fn routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::scope("/healthcheck").route("", web::get().to(index)));
 
-pub fn auth_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/auth")
-            .route("login", web::post().to(user::handler::login))
-            .route("register", web::post().to(user::handler::register))
+            .route("login", web::post().to(login))
+            .route("register", web::post().to(register)),
     );
-}
 
-pub fn user_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/user")
-            .route("", web::get().to(user::handler::get_myself)) // need token
-            .route("", web::put().to(user::handler::update)) // need token
+            .route("", web::get().to(get_myself)) // need token
+            .route("", web::put().to(update)), // need token
     );
-}
 
-pub fn artist_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/artist")
-        .route(
-            "/search/{artist_name}",
-            web::get().to(search_artists_by_name)
-        )
+    cfg.service(
+        web::scope("/artist")
+            .route("/{artist_name}", web::get().to(search_artists_by_name))
+            .route("", web::post().to(add_artist)),
     );
-}
 
-pub fn album_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/album")
-        .route("/search/{album_name}", web::get().to(search_albums_by_name))
+            .route("/{album_name}", web::get().to(search_albums_by_name))
+            .route("/{album_id}", web::delete().to(remove_album))
+            .route("/issue/{album_id}", web::post().to(issue_album))
+            .route("", web::post().to(create_album))
+            .route("/track/add/{album_id}", web::post().to(add_track_to_album)),
     );
-}
 
-pub fn favorite_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::scope("/audio").route("/{track_id}", web::post().to(upload_audio)));
+
     cfg.service(
-        web::scope("/favorite")
-        .route("/search", web::get().to(search_favorites)) // need token
-        .route("/add/{album_id}", web::get().to(add_to_favorites)) // need token
-        .route("/remove/{album_id}", web::get().to(remove_from_favorites)) // need token
+        web::scope("/favorite_albums")
+            .route("", web::get().to(search_favorite_albums)) // need token
+            .route("/{album_id}", web::get().to(add_to_favorite_albums)) // need token
+            .route("/{album_id}", web::delete().to(remove_from_favorite_albums)), // need token
+    );
+    cfg.service(
+        web::scope("/favorite_artists")
+            .route("", web::get().to(search_favorite_artists))
+            .route("/{artist_id}", web::post().to(add_to_favorite_artists))
+            .route(
+                "/{artist_id}",
+                web::delete().to(remove_from_favorite_artists),
+            ),
+    );
+
+    cfg.service(
+        web::scope("/track_history")
+            .route("/{track_id}", web::get().to(search_last_playback_of_track))
+            .route("/{track_id}", web::put().to(update_last_playback_of_track)),
+    );
+    cfg.service(
+        web::scope("/album_history")
+            .route("/{track_id}", web::get().to(search_last_playback_of_album))
+            .route("/{track_id}", web::put().to(update_last_playback_of_album)),
+    );
+
+    cfg.service(
+        web::scope("/comment")
+            .route("/{album_id}", web::post().to(add_comment))
+            .route("/{album_id}/{comment_id}", web::delete().to(delete_comment))
+            .route("/{album_id}", web::get().to(get_comments_of_album)),
     );
 }

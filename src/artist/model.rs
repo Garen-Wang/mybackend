@@ -1,6 +1,6 @@
-use diesel::{Queryable, Identifiable, Insertable, AsChangeset, PgConnection, QueryDsl, RunQueryDsl, TextExpressionMethods};
-use serde::{Serialize, Deserialize};
-use crate::{schema::artists, error::AppError};
+use crate::{error::AppError, schema::artists};
+use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable)]
 #[diesel(table_name = artists)]
@@ -30,7 +30,14 @@ impl Artist {
 
     pub fn search(conn: &mut PgConnection, name: String) -> Result<Vec<Artist>, AppError> {
         let temp = format!("{}%", name);
-        let artists: Vec<Artist> = artists::table.filter(artists::name.like(temp)).get_results(conn)?;
+        let artists: Vec<Artist> = artists::table
+            .filter(artists::name.like(temp))
+            .get_results(conn)?;
         Ok(artists)
+    }
+
+    pub fn create(conn: &mut PgConnection, name: &str) -> Result<Artist, AppError> {
+        let artist = diesel::insert_into(artists::table).values(InsertArtist { name }).get_result::<Artist>(conn)?;
+        Ok(artist)
     }
 }

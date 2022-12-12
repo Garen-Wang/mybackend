@@ -50,13 +50,17 @@ impl SkipAuthRoute {
 }
 
 // TODO: not complete
-const SKIP_AUTH_ROUTES: [SkipAuthRoute; 2] = [
+const SKIP_AUTH_ROUTES: [SkipAuthRoute; 3] = [
     SkipAuthRoute {
         path: "/healthcheck",
         method: Method::GET,
     },
     SkipAuthRoute {
         path: "/auth/login",
+        method: Method::POST,
+    },
+    SkipAuthRoute {
+        path: "/auth/register",
         method: Method::POST,
     },
 ];

@@ -2,9 +2,6 @@
 create table tracks (
     id serial primary key,
     name text not null,
-    time_length int not null,
-    last_time int default 0,
-    last_playback timestamp default current_timestamp,
     artist_id serial not null references artists (id) on delete cascade,
     album_id serial not null references albums (id) on delete cascade
 );

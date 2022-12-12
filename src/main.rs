@@ -1,23 +1,28 @@
 extern crate diesel;
 
-pub mod healthcheck;
-pub mod user;
 pub mod album;
 pub mod artist;
-pub mod track;
 pub mod favorite;
+pub mod healthcheck;
+pub mod user;
+pub mod history;
+pub mod comment;
 
-pub mod token;
 pub mod auth;
 pub mod error;
 pub mod routes;
 pub mod schema;
+pub mod token;
 
 use std::io;
 
 use actix_cors::Cors;
+use actix_files::Files;
 use actix_web::{http, middleware::Logger, web, App, HttpServer};
-use diesel::{r2d2::{self, ConnectionManager, PooledConnection}, PgConnection};
+use diesel::{
+    r2d2::{self, ConnectionManager, PooledConnection},
+    PgConnection,
+};
 use dotenv::dotenv;
 use error::AppError;
 
@@ -46,7 +51,9 @@ async fn main() -> io::Result<()> {
     env_logger::init();
 
     let manager = Manager::new(database_url);
-    let pool = r2d2::Pool::builder().build(manager).expect("failed to build pool");
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("failed to build pool");
 
     let app_state = AppState { pool };
 
@@ -59,15 +66,12 @@ async fn main() -> io::Result<()> {
             .max_age(3600);
 
         App::new()
+            .service(Files::new("/audio", "static/audio/").show_files_listing())
             .wrap(Logger::default())
             .app_data(web::Data::new(app_state.clone()))
             .wrap(cors)
             .wrap(auth::Authorization)
-            .configure(routes::healthcheck_routes)
-            .configure(routes::auth_routes)
-            .configure(routes::user_routes)
-            .configure(routes::artist_routes)
-            .configure(routes::album_routes)
+            .configure(routes::routes)
     })
     .bind("localhost:7878")?
     .run()

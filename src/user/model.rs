@@ -1,5 +1,5 @@
-use crate::{error::AppError, schema::users};
 use crate::token;
+use crate::{error::AppError, schema::users};
 use chrono::Utc;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};

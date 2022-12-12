@@ -1,8 +1,8 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, HttpRequest};
 
-use crate::{error::AppError, AppState, artist::response::ArtistResponse};
+use crate::{artist::response::ArtistResponse, error::AppError, AppState, auth::get_current_user};
 
-use super::model::Artist;
+use super::{model::Artist, request::AddArtistRequest};
 
 pub async fn search_artists_by_name(
     app_state: web::Data<AppState>,
@@ -15,3 +15,18 @@ pub async fn search_artists_by_name(
     Ok(HttpResponse::Ok().json(res))
 }
 
+pub async fn add_artist(
+    app_state: web::Data<AppState>,
+    req: HttpRequest,
+    form: web::Json<AddArtistRequest>,
+) -> Result<HttpResponse, AppError> {
+    let mut conn = app_state.conn()?;
+    let current_user = get_current_user(&req)?;
+    if current_user.is_admin {
+        let artist = Artist::create(&mut conn, &form.new_artist.name)?;
+        let res = ArtistResponse::from(artist);
+        Ok(HttpResponse::Ok().json(res))
+    } else  {
+        Err(AppError::InternalServerError)
+    }
+}

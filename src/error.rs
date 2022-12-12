@@ -1,5 +1,6 @@
-use actix_web::{HttpResponse, http::StatusCode};
-use serde_json::{Value, json};
+use actix_multipart::MultipartError;
+use actix_web::{http::StatusCode, HttpResponse, error::BlockingError};
+use serde_json::{json, Value};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -27,7 +28,9 @@ impl actix_web::error::ResponseError for AppError {
             AppError::Forbidden(val) => HttpResponse::Forbidden().json(val),
             AppError::NotFound(val) => HttpResponse::NotFound().json(val),
             AppError::UnprocessableEntity(val) => HttpResponse::UnprocessableEntity().json(val),
-            AppError::InternalServerError => HttpResponse::InternalServerError().json("internal server error"),
+            AppError::InternalServerError => {
+                HttpResponse::InternalServerError().json("internal server error")
+            }
         }
     }
 
@@ -77,6 +80,24 @@ impl From<jsonwebtoken::errors::Error> for AppError {
 
 impl From<r2d2::Error> for AppError {
     fn from(_: r2d2::Error) -> Self {
+        AppError::InternalServerError
+    }
+}
+
+impl From<MultipartError> for AppError {
+    fn from(_: MultipartError) -> Self {
+        AppError::InternalServerError
+    }
+}
+
+impl From<BlockingError> for AppError {
+    fn from(_: BlockingError) -> Self {
+        AppError::InternalServerError
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(_: std::io::Error) -> Self {
         AppError::InternalServerError
     }
 }
