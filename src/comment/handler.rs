@@ -15,12 +15,7 @@ pub async fn add_comment(
     let mut conn = app_state.conn()?;
     let current_user = get_current_user(&req)?;
     let album_id = params.into_inner();
-    let a = Comment::create(
-        &mut conn,
-        album_id,
-        current_user.id,
-        &form.comment.body,
-    )?;
+    let a = Comment::create(&mut conn, album_id, current_user.id, &form.comment.body)?;
     Ok(HttpResponse::Ok().json(json!({ "result": a })))
 }
 
@@ -28,12 +23,20 @@ pub async fn add_comment(
 pub async fn delete_comment(
     app_state: web::Data<AppState>,
     req: HttpRequest,
-    params: web::Path<(i32, i32)>,
+    params: web::Path<i32>,
 ) -> Result<HttpResponse, AppError> {
     let mut conn = app_state.conn()?;
     let current_user = get_current_user(&req)?;
-    let (album_id, comment_id) = params.into_inner();
-    let a = Comment::delete(&mut conn, album_id, current_user.id, comment_id)?;
+    let comment_id = params.into_inner();
+    let a = Comment::delete(
+        &mut conn,
+        comment_id,
+        if current_user.is_admin {
+            None
+        } else {
+            Some(current_user.id)
+        },
+    )?;
     Ok(HttpResponse::Ok().json(json!({ "result": a })))
 }
 

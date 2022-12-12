@@ -67,7 +67,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/comment")
             .route("/{album_id}", web::post().to(add_comment))
-            .route("/{album_id}/{comment_id}", web::delete().to(delete_comment))
+            .route("/{comment_id}", web::delete().to(delete_comment))
             .route("/{album_id}", web::get().to(get_comments_of_album)),
     );
 }

@@ -77,10 +77,12 @@ pub async fn create_album(
 // POST
 pub async fn add_track_to_album(
     app_state: web::Data<AppState>,
+    req: HttpRequest,
     params: web::Path<i32>,
     form: web::Json<AddTrackRequest>,
 ) -> Result<HttpResponse, AppError> {
     let mut conn = app_state.conn()?;
+    let _current_user = get_current_user(&req)?;
     let album_id = params.into_inner();
     let track = Track::create(&mut conn, &form.new_track.name, form.new_track.artist_id, album_id)?;
     let res = TrackResponse::from(track);

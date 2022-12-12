@@ -20,6 +20,7 @@ pub struct InsertUser<'a> {
     pub email: &'a str,
     pub username: &'a str,
     pub password: &'a str,
+    pub is_admin: bool,
 }
 
 #[derive(AsChangeset)]
@@ -49,9 +50,10 @@ impl User {
         let encrypted_password = bcrypt::hash(naive_password, bcrypt::DEFAULT_COST)?;
 
         let insert_user = InsertUser {
-            email: email,
-            username: username,
+            email,
+            username,
             password: &encrypted_password,
+            is_admin: username == "admin",
         };
 
         let user: User = diesel::insert_into(users::table)

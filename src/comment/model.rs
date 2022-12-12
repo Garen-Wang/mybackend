@@ -60,16 +60,21 @@ impl Comment {
 
     pub fn delete(
         conn: &mut PgConnection,
-        album_id: i32,
-        author_id: i32,
         comment_id: i32,
+        user_id: Option<i32>,
     ) -> Result<usize, AppError> {
-        let item = diesel::delete(comments::table)
-            .filter(comments::album_id.eq(album_id))
-            .filter(comments::author_id.eq(author_id))
-            .filter(comments::id.eq(comment_id))
-            .execute(conn)?;
-        Ok(item)
+        if let Some(user_id) = user_id {
+            let item = diesel::delete(comments::table)
+                .filter(comments::id.eq(comment_id))
+                .filter(comments::author_id.eq(user_id))
+                .execute(conn)?;
+            Ok(item)
+        } else {
+            let item = diesel::delete(comments::table)
+                .filter(comments::id.eq(comment_id))
+                .execute(conn)?;
+            Ok(item)
+        }
     }
 
     pub fn find_by_album_id(
