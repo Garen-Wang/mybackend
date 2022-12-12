@@ -102,7 +102,7 @@ pub async fn upload_audio(
             sanitize_filename::sanitize(Uuid::new_v4().to_string())
         };
         
-        let filepath = format!("./public/{new_filename}");
+        let filepath = format!("./static/audio/{new_filename}");
 
         let mut f = web::block(|| std::fs::File::create(filepath)).await??;
 
