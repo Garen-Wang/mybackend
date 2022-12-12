@@ -55,7 +55,7 @@ PUT /user
 
 GET /artist/{artist_name}
 
-### create artist
+### create artist (need token)
 
 POST /artist
 
@@ -96,7 +96,7 @@ DELETE album/{album_id}
 
 ## audio
 
-### admin upload & user upload track audio file
+### admin upload & user upload track audio file (need token)
 
 POST /audio/{track_id}
 

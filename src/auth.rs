@@ -6,6 +6,7 @@ use actix_web::{
 };
 use diesel::PgConnection;
 use futures::future::LocalBoxFuture;
+use lazy_static::lazy_static;
 use serde_json::json;
 use std::future::{ready, Ready};
 
@@ -49,21 +50,35 @@ impl SkipAuthRoute {
     }
 }
 
-// TODO: not complete
-const SKIP_AUTH_ROUTES: [SkipAuthRoute; 3] = [
-    SkipAuthRoute {
-        path: "/healthcheck",
-        method: Method::GET,
-    },
-    SkipAuthRoute {
-        path: "/auth/login",
-        method: Method::POST,
-    },
-    SkipAuthRoute {
-        path: "/auth/register",
-        method: Method::POST,
-    },
-];
+lazy_static! {
+    // TODO: not complete
+    static ref SKIP_AUTH_ROUTES: Vec<SkipAuthRoute> = vec![
+        SkipAuthRoute {
+            path: "/healthcheck",
+            method: Method::GET,
+        },
+        SkipAuthRoute {
+            path: "/auth/login",
+            method: Method::POST,
+        },
+        SkipAuthRoute {
+            path: "/auth/register",
+            method: Method::POST,
+        },
+        SkipAuthRoute {
+            path: "/artist/{artist_name}",
+            method: Method::GET,
+        },
+        SkipAuthRoute {
+            path: "/album/{album_name}",
+            method: Method::GET,
+        },
+        SkipAuthRoute {
+            path: "/comment/{album_id}",
+            method: Method::GET,
+        },
+    ];
+}
 
 fn should_skip_auth(req: &ServiceRequest) -> bool {
     let method = req.method();

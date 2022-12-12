@@ -91,9 +91,11 @@ pub async fn add_track_to_album(
 
 pub async fn upload_audio(
     params: web::Path<i32>,
+    req: HttpRequest,
     mut payload: Multipart
 ) -> Result<HttpResponse, AppError> {
     let track_id = params.into_inner();
+    let _current_user = get_current_user(&req)?;
     while let Some(mut field) = payload.try_next().await? {
         let content_disposition = field.content_disposition();
 

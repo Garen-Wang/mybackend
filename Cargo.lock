@@ -1044,6 +1044,7 @@ dependencies = [
  "env_logger",
  "futures",
  "jsonwebtoken",
+ "lazy_static",
  "log",
  "r2d2",
  "sanitize-filename",
