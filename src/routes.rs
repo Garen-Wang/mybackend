@@ -6,7 +6,8 @@ use crate::{
 };
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/healthcheck").route("", web::get().to(index)));
+    cfg.service(web::scope("/healthcheck1").route("", web::get().to(healthcheck1)));
+    cfg.service(web::scope("/healthcheck2").route("", web::get().to(healthcheck2)));
 
     cfg.service(
         web::scope("/auth")

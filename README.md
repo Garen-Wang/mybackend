@@ -2,9 +2,23 @@
 
 ## healthcheck
 
-GET /healthcheck
+GET /healthcheck1
 
 return ok
+
+GET /healthcheck2
+
+```json
+{
+    "name": "jrqjrqjrq",
+    "array": [1, 2, 3],
+    "objects": [
+        {"key": 1, "value": "j"},
+        {"key": 2, "value": "r"},
+        {"key": 3, "value": "q"}
+    ]
+}
+```
 
 ## auth
 

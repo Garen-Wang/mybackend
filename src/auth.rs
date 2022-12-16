@@ -54,7 +54,11 @@ lazy_static! {
     // TODO: not complete
     static ref SKIP_AUTH_ROUTES: Vec<SkipAuthRoute> = vec![
         SkipAuthRoute {
-            path: "/healthcheck",
+            path: "/healthcheck1",
+            method: Method::GET,
+        },
+        SkipAuthRoute {
+            path: "/healthcheck2",
             method: Method::GET,
         },
         SkipAuthRoute {

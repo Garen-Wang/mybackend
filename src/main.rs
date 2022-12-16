@@ -73,7 +73,7 @@ async fn main() -> io::Result<()> {
             .wrap(auth::Authorization)
             .configure(routes::routes)
     })
-    .bind("localhost:7878")?
+    .bind("0.0.0.0:7878")?
     .run()
     .await
 }
