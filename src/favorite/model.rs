@@ -2,7 +2,7 @@ use crate::{
     album::model::Album,
     artist::model::Artist,
     error::AppError,
-    schema::{albums, favorite_albums, favorite_artists, singers},
+    schema::{albums, favorite_albums, favorite_artists, artists},
 };
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -128,9 +128,9 @@ impl FavoriteArtist {
             .filter(favorite_artists::user_id.eq(user_id))
             .select(favorite_artists::artist_id)
             .get_results::<i32>(conn)?;
-        let singers = singers::table
-            .filter(singers::id.eq_any(ids))
+        let artists = artists::table
+            .filter(artists::id.eq_any(ids))
             .load::<Artist>(conn)?;
-        Ok(singers)
+        Ok(artists)
     }
 }

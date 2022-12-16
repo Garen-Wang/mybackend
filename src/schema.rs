@@ -43,13 +43,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    singers (id) {
-        id -> Int4,
-        name -> Text,
-    }
-}
-
-diesel::table! {
     tracks (id) {
         id -> Int4,
         name -> Text,
@@ -108,7 +101,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     comments,
     favorite_albums,
     favorite_artists,
-    singers,
     tracks,
     user_album_history,
     user_track_history,
