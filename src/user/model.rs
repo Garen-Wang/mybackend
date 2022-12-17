@@ -92,6 +92,16 @@ impl User {
         Ok(user)
     }
 
+    pub fn delete(
+        conn: &mut PgConnection,
+        user_id: i32,
+    ) -> Result<usize, AppError> {
+        let item = diesel::delete(users::table)
+        .filter(users::id.eq(user_id))
+        .execute(conn)?;
+        Ok(item)
+    }
+
     pub fn find(conn: &mut PgConnection, user_id: i32) -> Result<User, AppError> {
         let user = users::table.find(user_id).first(conn)?;
         Ok(user)
@@ -103,5 +113,10 @@ impl User {
             .limit(1)
             .first(conn)?;
         Ok(user)
+    }
+
+    pub fn get_all(conn: &mut PgConnection) -> Result<Vec<User>, AppError> {
+        let users = users::table.get_results::<User>(conn)?;
+        Ok(users)
     }
 }

@@ -18,7 +18,9 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/user")
             .route("", web::get().to(get_myself)) // need token
-            .route("", web::put().to(update)), // need token
+            .route("", web::put().to(update)) // need token
+            .route("/all", web::get().to(get_all_users)) // need admin token
+            .route("/{user_id}", web::delete().to(remove_user)) // need admin token
     );
 
     cfg.service(
