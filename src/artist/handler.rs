@@ -30,3 +30,14 @@ pub async fn add_artist(
         Err(AppError::InternalServerError)
     }
 }
+
+pub async fn get_all_artists(
+    app_state: web::Data<AppState>,
+    req: HttpRequest,
+) -> Result<HttpResponse, AppError> {
+    let mut conn = app_state.conn()?;
+    let _current_user = get_current_user(&req)?;
+    let artists = Artist::get_all(&mut conn)?;
+    let res = ArtistResponse::from(artists);
+    Ok(HttpResponse::Ok().json(res))
+}

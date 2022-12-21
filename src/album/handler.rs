@@ -116,3 +116,14 @@ pub async fn upload_audio(
     }
     Ok(HttpResponse::Ok().json(json!({"result": 1})))
 }
+
+pub async fn get_all_albums(
+    app_state: web::Data<AppState>,
+    req: HttpRequest,
+) -> Result<HttpResponse, AppError> {
+    let mut conn = app_state.conn()?;
+    let _current_user = get_current_user(&req)?;
+    let albums = Album::get_all(&mut conn)?;
+    let res = AlbumResponse::from(albums);
+    Ok(HttpResponse::Ok().json(res))
+}

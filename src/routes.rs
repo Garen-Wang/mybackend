@@ -26,11 +26,13 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/artist")
             .route("/{artist_name}", web::get().to(search_artists_by_name))
+            .route("/all", web::get().to(get_all_artists))
             .route("", web::post().to(add_artist)),
     );
 
     cfg.service(
         web::scope("/album")
+            .route("/all", web::get().to(get_all_albums))
             .route("/{album_name}", web::get().to(search_albums_by_name))
             .route("/{album_id}", web::delete().to(remove_album))
             .route("/issue/{album_id}", web::post().to(issue_album))

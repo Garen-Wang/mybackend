@@ -40,4 +40,9 @@ impl Artist {
         let artist = diesel::insert_into(artists::table).values(InsertArtist { name }).get_result::<Artist>(conn)?;
         Ok(artist)
     }
+
+    pub fn get_all(conn: &mut PgConnection) -> Result<Vec<Artist>, AppError> {
+        let artists = artists::table.get_results::<Artist>(conn)?;
+        Ok(artists)
+    }
 }

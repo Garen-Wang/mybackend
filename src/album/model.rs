@@ -72,6 +72,11 @@ impl Album {
             .get_result::<Album>(conn)?;
         Ok(album)
     }
+
+    pub fn get_all(conn: &mut PgConnection) -> Result<Vec<Album>, AppError> {
+        let albums = albums::table.get_results::<Album>(conn)?;
+        Ok(albums)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable)]
