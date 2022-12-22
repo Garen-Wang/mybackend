@@ -4,8 +4,9 @@ diesel::table! {
     albums (id) {
         id -> Int4,
         name -> Text,
+        last_playback -> Timestamp,
         artist_id -> Int4,
-        agreed -> Bool,
+        issued -> Bool,
     }
 }
 
@@ -46,28 +47,10 @@ diesel::table! {
     tracks (id) {
         id -> Int4,
         name -> Text,
+        last_playback -> Timestamp,
+        url -> Text,
         artist_id -> Int4,
         album_id -> Int4,
-    }
-}
-
-diesel::table! {
-    user_album_history (id) {
-        id -> Int4,
-        user_id -> Int4,
-        album_id -> Int4,
-        last_time -> Nullable<Int4>,
-        last_date -> Nullable<Timestamp>,
-    }
-}
-
-diesel::table! {
-    user_track_history (id) {
-        id -> Int4,
-        user_id -> Int4,
-        track_id -> Int4,
-        last_time -> Nullable<Int4>,
-        last_date -> Nullable<Timestamp>,
     }
 }
 
@@ -90,10 +73,6 @@ diesel::joinable!(favorite_artists -> artists (artist_id));
 diesel::joinable!(favorite_artists -> users (user_id));
 diesel::joinable!(tracks -> albums (album_id));
 diesel::joinable!(tracks -> artists (artist_id));
-diesel::joinable!(user_album_history -> albums (album_id));
-diesel::joinable!(user_album_history -> users (user_id));
-diesel::joinable!(user_track_history -> tracks (track_id));
-diesel::joinable!(user_track_history -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     albums,
@@ -102,7 +81,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     favorite_albums,
     favorite_artists,
     tracks,
-    user_album_history,
-    user_track_history,
     users,
 );

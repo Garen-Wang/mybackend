@@ -1,4 +1,8 @@
-use crate::{error::AppError, schema::{albums, tracks}};
+use crate::{
+    error::AppError,
+    schema::{albums, tracks},
+};
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -7,8 +11,9 @@ use serde::{Deserialize, Serialize};
 pub struct Album {
     pub id: i32,
     pub name: String,
+    pub last_playback: NaiveDateTime,
     pub artist_id: i32,
-    pub agreed: bool,
+    pub issued: bool,
 }
 
 #[derive(Insertable)]
@@ -16,14 +21,15 @@ pub struct Album {
 pub struct InsertAlbum<'a> {
     pub name: &'a str,
     pub artist_id: i32,
-    pub agreed: bool,
+    pub issued: bool,
 }
 
 #[derive(AsChangeset)]
 #[diesel(table_name = albums)]
 pub struct UpdateAlbum {
     pub name: Option<String>,
-    pub agreed: Option<bool>,
+    pub last_playback: Option<NaiveDateTime>,
+    pub issued: Option<bool>,
 }
 
 // static methods
@@ -33,16 +39,25 @@ impl Album {
         Ok(album)
     }
 
-    pub fn find_by_aritst(conn: &mut PgConnection, artist_id: i32) -> Result<Vec<Album>, AppError> {
+    pub fn find_by_artist(conn: &mut PgConnection, artist_id: i32) -> Result<Vec<Album>, AppError> {
         let albums = albums::table
             .filter(albums::artist_id.eq(artist_id))
             .get_results::<Album>(conn)?;
         Ok(albums)
     }
 
-    pub fn create(conn: &mut PgConnection, artist_id: i32, name: &str, agreed: bool) -> Result<Album, AppError> {
+    pub fn create(
+        conn: &mut PgConnection,
+        artist_id: i32,
+        name: &str,
+        issued: bool,
+    ) -> Result<Album, AppError> {
         let album = diesel::insert_into(albums::table)
-            .values(InsertAlbum { name, artist_id, agreed })
+            .values(InsertAlbum {
+                name,
+                artist_id,
+                issued,
+            })
             .get_result::<Album>(conn)?;
         Ok(album)
     }
@@ -64,8 +79,9 @@ impl Album {
 
     pub fn issue(conn: &mut PgConnection, album_id: i32) -> Result<Self, AppError> {
         let changeset = UpdateAlbum {
-            agreed: Some(true),
+            issued: Some(true),
             name: None,
+            last_playback: None,
         };
         let album = diesel::update(albums::table.find(album_id))
             .set(changeset)
@@ -77,6 +93,32 @@ impl Album {
         let albums = albums::table.get_results::<Album>(conn)?;
         Ok(albums)
     }
+
+    pub fn get_all_issued(conn: &mut PgConnection) -> Result<Vec<Album>, AppError> {
+        let albums = albums::table
+            .filter(albums::issued.eq(true))
+            .get_results::<Album>(conn)?;
+        Ok(albums)
+    }
+
+    pub fn get_all_unissued(conn: &mut PgConnection) -> Result<Vec<Album>, AppError> {
+        let albums = albums::table
+            .filter(albums::issued.eq(false))
+            .get_results::<Album>(conn)?;
+        Ok(albums)
+    }
+
+    pub fn play(conn: &mut PgConnection, album_id: i32) -> Result<Self, AppError> {
+        let changeset = UpdateAlbum {
+            last_playback: Some(Utc::now().naive_utc()),
+            name: None,
+            issued: None,
+        };
+        let album = diesel::update(albums::table.find(album_id))
+            .set(changeset)
+            .get_result::<Album>(conn)?;
+        Ok(album)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Identifiable)]
@@ -84,6 +126,8 @@ impl Album {
 pub struct Track {
     pub id: i32,
     pub name: String,
+    pub last_playback: NaiveDateTime,
+    pub url: String,
     pub artist_id: i32,
     pub album_id: i32,
 }
@@ -100,6 +144,7 @@ pub struct InsertTrack<'a> {
 #[diesel(table_name = tracks)]
 pub struct UpdateTrack {
     pub name: Option<String>,
+    pub last_playback: Option<NaiveDateTime>,
 }
 
 // static methods
@@ -111,7 +156,8 @@ impl Track {
 
     pub fn find_by_album(conn: &mut PgConnection, album_id: i32) -> Result<Vec<Track>, AppError> {
         let tracks = tracks::table
-        .filter(tracks::album_id.eq(album_id)).get_results::<Track>(conn)?;
+            .filter(tracks::album_id.eq(album_id))
+            .get_results::<Track>(conn)?;
         Ok(tracks)
     }
 
@@ -122,8 +168,28 @@ impl Track {
         album_id: i32,
     ) -> Result<Track, AppError> {
         let track = diesel::insert_into(tracks::table)
-            .values(InsertTrack { name, artist_id, album_id })
+            .values(InsertTrack {
+                name,
+                artist_id,
+                album_id,
+            })
             .get_result::<Track>(conn)?;
         Ok(track)
+    }
+
+    pub fn play(conn: &mut PgConnection, track_id: i32) -> Result<Self, AppError> {
+        let changeset = UpdateTrack {
+            name: None,
+            last_playback: Some(Utc::now().naive_utc()),
+        };
+        let track = diesel::update(tracks::table.find(track_id))
+            .set(changeset)
+            .get_result::<Track>(conn)?;
+        Ok(track)
+    }
+
+    pub fn get_all(conn: &mut PgConnection) -> Result<Vec<Track>, AppError> {
+        let tracks = tracks::table.get_results::<Track>(conn)?;
+        Ok(tracks)
     }
 }

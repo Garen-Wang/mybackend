@@ -5,7 +5,6 @@ pub mod artist;
 pub mod favorite;
 pub mod healthcheck;
 pub mod user;
-pub mod history;
 pub mod comment;
 
 pub mod auth;

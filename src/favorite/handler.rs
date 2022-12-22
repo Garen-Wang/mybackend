@@ -15,7 +15,7 @@ pub async fn search_favorite_albums(
     let mut conn = app_state.conn()?;
     let current_user = get_current_user(&req)?;
     let albums = FavoriteAlbum::find_by_user_id(&mut conn, current_user.id)?;
-    let res = FavoriteAlbumResponse::from(albums);
+    let res = FavoriteAlbumResponse::from((albums, &mut conn));
     Ok(HttpResponse::Ok().json(res))
 }
 
@@ -50,7 +50,7 @@ pub async fn search_favorite_artists(
     let mut conn = app_state.conn()?;
     let current_user = get_current_user(&req)?;
     let artists = FavoriteArtist::find_by_user_id(&mut conn, current_user.id)?;
-    let res = FavoriteArtistResponse::from(artists);
+    let res = FavoriteArtistResponse::from((artists, &mut conn));
     Ok(HttpResponse::Ok().json(res))
 }
 
