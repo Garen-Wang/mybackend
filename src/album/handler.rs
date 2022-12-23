@@ -8,7 +8,7 @@ use crate::{
 
 use super::{
     model::{Album, Track},
-    request::CreateAlbumRequest,
+    request::{CreateAlbumRequest, AddTrackRequest},
     response::TrackResponse,
 };
 
@@ -102,19 +102,22 @@ pub async fn get_album_by_id(
     Ok(HttpResponse::Ok().json(res))
 }
 
-// pub async fn add_track_to_album(
-//     app_state: web::Data<AppState>,
-//     req: HttpRequest,
-//     params: web::Path<i32>,
-//     form: web::Json<AddTrackRequest>,
-// ) -> Result<HttpResponse, AppError> {
-//     let mut conn = app_state.conn()?;
-//     let _current_user = get_current_user(&req)?;
-//     let album_id = params.into_inner();
-//     let track = Track::create(&mut conn, &form.new_track.name, form.new_track.artist_id, album_id)?;
-//     let res = TrackResponse::from(track);
-//     Ok(HttpResponse::Ok().json(res))
-// }
+pub async fn add_track_to_album(
+    app_state: web::Data<AppState>,
+    req: HttpRequest,
+    params: web::Path<i32>,
+    form: web::Json<AddTrackRequest>,
+) -> Result<HttpResponse, AppError> {
+    let mut conn = app_state.conn()?;
+    let _current_user = get_current_user(&req)?;
+    let album_id = params.into_inner();
+    let album = Album::find(&mut conn, album_id)?;
+    for track in form.tracks.iter() {
+        Track::create(&mut conn, &track.name, &track.url, album.artist_id, album_id)?;
+    }
+    let res = AlbumResponse::from((album, &mut conn));
+    Ok(HttpResponse::Ok().json(res))
+}
 
 // pub async fn upload_audio(
 //     params: web::Path<i32>,

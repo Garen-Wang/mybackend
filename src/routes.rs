@@ -45,6 +45,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
 
     cfg.service(web::scope("/track")
         .route("/play/{track_id}", web::get().to(play_track))
+        .route("/add/{album_id}", web::post().to(add_track_to_album))
         .route("/all", web::get().to(get_all_tracks))
     );
 
