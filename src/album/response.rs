@@ -14,6 +14,7 @@ pub struct AlbumWithTracks {
     pub album: Album,
     pub artist_name: String,
     pub tracks: Vec<Track>,
+    pub comments: Vec<Comment>,
 }
 
 impl From<(Album, &mut AppConn)> for AlbumResponse {
@@ -23,6 +24,7 @@ impl From<(Album, &mut AppConn)> for AlbumResponse {
             albums: vec![AlbumWithTracks {
                 artist_name: Artist::find(conn, album.artist_id).unwrap().name,
                 tracks: Track::find_by_album(conn, album.id).unwrap(),
+                comments: Comment::find_by_album_id(conn, album.id).unwrap(),
                 album,
             }],
         }
@@ -38,6 +40,7 @@ impl From<(Vec<Album>, &mut AppConn)> for AlbumResponse {
                 .map(|album| AlbumWithTracks {
                     artist_name: Artist::find(conn, album.artist_id).unwrap().name,
                     tracks: Track::find_by_album(conn, album.id).unwrap(),
+                    comments: Comment::find_by_album_id(conn, album.id).unwrap(),
                     album,
                 })
                 .collect(),

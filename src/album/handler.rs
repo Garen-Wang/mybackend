@@ -1,7 +1,10 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde_json::json;
 
-use crate::{album::response::AlbumResponse, auth::get_current_user, error::AppError, AppState, artist::model::Artist};
+use crate::{
+    album::response::AlbumResponse, artist::model::Artist, auth::get_current_user, error::AppError,
+    AppState,
+};
 
 use super::{
     model::{Album, Track},
@@ -85,7 +88,12 @@ pub async fn create_album(
         .map(|track| Track::create(&mut conn, &track.name, album.artist_id, album.id).unwrap())
         .collect();
     let res = AlbumResponse {
-        albums: vec![AlbumWithTracks {tracks, album, artist_name: artist.name }],
+        albums: vec![AlbumWithTracks {
+            tracks,
+            album,
+            artist_name: artist.name,
+            comments: vec![],
+        }],
     };
     Ok(HttpResponse::Ok().json(res))
 }
