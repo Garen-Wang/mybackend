@@ -7,7 +7,7 @@ pub struct CreateAlbumRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateAlbumRequestInner {
-    pub artist_name: i32,
+    pub artist_name: String,
     pub album_name: String,
     pub tracks: Vec<AddTrackRequestInner>,
 }

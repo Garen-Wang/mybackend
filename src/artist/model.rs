@@ -28,6 +28,11 @@ impl Artist {
         Ok(artist)
     }
 
+    pub fn find_by_name(conn: &mut PgConnection, artist_name: &str) -> Result<Artist, AppError> {
+        let artist = artists::table.filter(artists::name.eq(artist_name)).first(conn)?;
+        Ok(artist)
+    }
+
     pub fn search(conn: &mut PgConnection, name: String) -> Result<Vec<Artist>, AppError> {
         let temp = format!("{}%", name);
         let artists: Vec<Artist> = artists::table

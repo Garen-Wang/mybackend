@@ -63,7 +63,7 @@ pub async fn create_album(
 ) -> Result<HttpResponse, AppError> {
     let mut conn = app_state.conn()?;
     let current_user = get_current_user(&req)?;
-    let artist = Artist::find(&mut conn, form.new_album.artist_name)?;
+    let artist = Artist::find_by_name(&mut conn, &form.new_album.artist_name)?;
     let album = Album::create(
         &mut conn,
         artist.id,
