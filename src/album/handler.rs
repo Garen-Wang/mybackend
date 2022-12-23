@@ -9,7 +9,7 @@ use crate::{
 use super::{
     model::{Album, Track},
     request::CreateAlbumRequest,
-    response::{AlbumWithTracks, TrackResponse},
+    response::TrackResponse,
 };
 
 pub async fn search_albums_by_name(
@@ -81,20 +81,10 @@ pub async fn create_album(
         &form.new_album.album_name,
         current_user.is_admin,
     )?;
-    let tracks = form
-        .new_album
-        .tracks
-        .iter()
-        .map(|track| Track::create(&mut conn, &track.name, album.artist_id, album.id).unwrap())
-        .collect();
-    let res = AlbumResponse {
-        albums: vec![AlbumWithTracks {
-            tracks,
-            album,
-            artist_name: artist.name,
-            comments: vec![],
-        }],
-    };
+    for track in form.new_album.tracks.iter() {
+        Track::create(&mut conn, &track.name, artist.id, album.id)?;
+    }
+    let res = AlbumResponse::from((album, &mut conn));
     Ok(HttpResponse::Ok().json(res))
 }
 

@@ -12,11 +12,6 @@ pub struct CreateAlbumRequestInner {
     pub tracks: Vec<AddTrackRequestInner>,
 }
 
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// pub struct AddTrackRequest {
-//     pub new_track: AddTrackRequestInner,
-// }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AddTrackRequestInner {
     pub name: String,
