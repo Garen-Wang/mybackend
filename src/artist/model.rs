@@ -28,6 +28,13 @@ impl Artist {
         Ok(artist)
     }
 
+    pub fn delete(conn: &mut PgConnection, artist_id: i32) -> Result<usize, AppError> {
+        let item = diesel::delete(artists::table)
+            .filter(artists::id.eq_all(artist_id))
+            .execute(conn)?;
+        Ok(item)
+    }
+
     pub fn find_by_name(conn: &mut PgConnection, artist_name: &str) -> Result<Artist, AppError> {
         let artist = artists::table.filter(artists::name.eq(artist_name)).first(conn)?;
         Ok(artist)

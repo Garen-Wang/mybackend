@@ -1,6 +1,7 @@
 use actix_web::{web, HttpRequest, HttpResponse};
+use serde_json::json;
 
-use crate::{artist::response::ArtistResponse, auth::get_current_user, error::AppError, AppState};
+use crate::{artist::response::ArtistResponse, auth::get_current_user, error::AppError, AppState, album::model::{Album, Track}};
 
 use super::{model::Artist, request::AddArtistRequest};
 
@@ -40,4 +41,28 @@ pub async fn get_all_artists(
     let artists = Artist::get_all(&mut conn)?;
     let res = ArtistResponse::from((artists, &mut conn));
     Ok(HttpResponse::Ok().json(res))
+}
+
+pub async fn delete_artist(
+    app_state: web::Data<AppState>,
+    req: HttpRequest,
+    params: web::Path<i32>,
+) -> Result<HttpResponse, AppError> {
+    let mut conn = app_state.conn()?;
+    let current_user = get_current_user(&req)?;
+    let artist_id = params.into_inner();
+    if current_user.is_admin {
+        let albums = Album::find_by_artist(&mut conn, artist_id)?;
+        for album in albums {
+            let tracks = Track::find_by_album(&mut conn, album.id)?;
+            for track in tracks {
+                Track::delete(&mut conn, track.id)?;
+            }
+            Album::delete(&mut conn, album.id)?;
+        }
+        let n = Artist::delete(&mut conn, artist_id)?;
+        Ok(HttpResponse::Ok().json(json!({"result": n})))
+    } else {
+        Err(AppError::InternalServerError)
+    }
 }

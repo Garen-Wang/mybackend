@@ -27,6 +27,7 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         web::scope("/artist")
             .route("/all", web::get().to(get_all_artists))
             .route("/{artist_name}", web::get().to(search_artists_by_name))
+            .route("/{artist_id}", web::delete().to(delete_artist))
             .route("", web::post().to(add_artist))
     );
 
