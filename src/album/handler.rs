@@ -29,6 +29,10 @@ pub async fn remove_album(
     let current_user = get_current_user(&req)?;
     let album_id = params.into_inner();
     if current_user.is_admin {
+        let tracks = Track::find_by_album(&mut conn, album_id)?;
+        for track in tracks {
+            Track::delete(&mut conn, track.id)?;
+        }
         let n = Album::delete(&mut conn, album_id)?;
         Ok(HttpResponse::Ok().json(json!({ "result": n })))
     } else {

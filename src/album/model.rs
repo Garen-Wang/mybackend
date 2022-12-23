@@ -161,6 +161,13 @@ impl Track {
         Ok(tracks)
     }
 
+    pub fn delete(conn: &mut PgConnection, track_id: i32) -> Result<usize, AppError> {
+        let item = diesel::delete(tracks::table)
+            .filter(tracks::id.eq_all(track_id))
+            .execute(conn)?;
+        Ok(item)
+    }
+
     pub fn create(
         conn: &mut PgConnection,
         name: &str,
