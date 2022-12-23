@@ -136,6 +136,7 @@ pub struct Track {
 #[diesel(table_name = tracks)]
 pub struct InsertTrack<'a> {
     pub name: &'a str,
+    pub url: &'a str,
     pub artist_id: i32,
     pub album_id: i32,
 }
@@ -171,12 +172,14 @@ impl Track {
     pub fn create(
         conn: &mut PgConnection,
         name: &str,
+        url: &str,
         artist_id: i32,
         album_id: i32,
     ) -> Result<Track, AppError> {
         let track = diesel::insert_into(tracks::table)
             .values(InsertTrack {
                 name,
+                url,
                 artist_id,
                 album_id,
             })

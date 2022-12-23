@@ -82,7 +82,7 @@ pub async fn create_album(
         current_user.is_admin,
     )?;
     for track in form.new_album.tracks.iter() {
-        Track::create(&mut conn, &track.name, artist.id, album.id)?;
+        Track::create(&mut conn, &track.name, &track.url, artist.id, album.id)?;
     }
     let res = AlbumResponse::from((album, &mut conn));
     Ok(HttpResponse::Ok().json(res))
