@@ -183,8 +183,12 @@ pub async fn get_all_tracks(
     req: HttpRequest,
 ) -> Result<HttpResponse, AppError> {
     let mut conn = app_state.conn()?;
-    let _current_user = get_current_user(&req)?;
-    let tracks = Track::get_all(&mut conn)?;
+    let current_user = get_current_user(&req)?;
+    let tracks = if current_user.is_admin {
+        Track::get_all(&mut conn)?
+    } else {
+        Track::get_all_issued(&mut conn)?
+    };
     let res = TrackResponse::from((tracks, &mut conn));
     Ok(HttpResponse::Ok().json(res))
 }

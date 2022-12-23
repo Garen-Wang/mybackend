@@ -202,4 +202,28 @@ impl Track {
         let tracks = tracks::table.get_results::<Track>(conn)?;
         Ok(tracks)
     }
+
+    pub fn get_all_issued(conn: &mut PgConnection) -> Result<Vec<Track>, AppError> {
+        let tracks = tracks::table.inner_join(albums::table).filter(albums::issued.eq(true)).select((
+            tracks::id,
+            tracks::name,
+            tracks::last_playback,
+            tracks::url,
+            tracks::artist_id,
+            tracks::album_id,
+        )).load(conn)?;
+        Ok(tracks)
+    }
+
+    pub fn get_all_unissued(conn: &mut PgConnection) -> Result<Vec<Track>, AppError> {
+        let tracks = tracks::table.inner_join(albums::table).filter(albums::issued.eq(false)).select((
+            tracks::id,
+            tracks::name,
+            tracks::last_playback,
+            tracks::url,
+            tracks::artist_id,
+            tracks::album_id,
+        )).load(conn)?;
+        Ok(tracks)
+    }
 }
